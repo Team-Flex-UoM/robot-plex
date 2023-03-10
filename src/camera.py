@@ -22,7 +22,7 @@ class Camera:
 		frame = cv2.remap(frame, _MAP_1, _MAP_2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT) # fisheye cleaning
 		return frame
 	
-	def get_mask_frame(self, color):
+	def get_mask_frame(self, color: int) -> np.ndarray:
 		hsv_frame = cv2.cvtColor(self._get_frame(), cv2.COLOR_BGR2HSV)
 		mask = cv2.inRange(hsv_frame, color[0], color[1])
 		return mask

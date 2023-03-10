@@ -1,11 +1,11 @@
-import camera as cam
+import camera
 import cv2
 
 # init
-camera = cam.Camera()
+cam = camera.Camera()
 
 while(True):
-    frame = camera.get_mask_frame(cam.WHITE)
+    frame = cam.get_mask_frame(camera.WHITE)
 
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
