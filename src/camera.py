@@ -18,11 +18,11 @@ class Camera:
 	
 	def _get_frame(self) -> np.ndarray:
 		ret, frame = self._cap.read()
-		assert ret, "There is an error while reading VideoCapture"
+		assert ret, "There is an error while reading VideoCapture" # TODO: return blank frame if error occurred
 		frame = cv2.remap(frame, _MAP_1, _MAP_2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT) # fisheye cleaning
 		return frame
 	
-	def get_mask_frame(self, color: int) -> np.ndarray:
+	def get_mask_frame(self, color: tuple) -> np.ndarray:
 		hsv_frame = cv2.cvtColor(self._get_frame(), cv2.COLOR_BGR2HSV)
 		mask = cv2.inRange(hsv_frame, color[0], color[1])
 		return mask
