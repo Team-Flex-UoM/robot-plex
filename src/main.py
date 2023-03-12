@@ -1,4 +1,4 @@
-import camera
+import plex.camera as camera
 import cv2
 
 # init
