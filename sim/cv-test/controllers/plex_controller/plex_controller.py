@@ -28,18 +28,22 @@ while robot.step(timestep) != -1:
     
     image_in_raw=camera.getImage()  
     image_in_list=list(image_in_raw)
-    image_in_arr=np.array(image_in_list)
-    image=np.reshape(image_in_arr,(imageHeight,imageWidth,4)) # image format : BGRA
+    image_in_arr=np.array(image_in_list,dtype=np.uint8)
+    image_in_bgra=np.reshape(image_in_arr,(imageHeight,imageWidth,4)) # image format : BGRA
     # image=np.reshape(image_in_arr,(imageHeight,imageWidth,4)) [:,:,:-1]  # image format : BGR
-    
+    image_in_bgr=cv2.cvtColor(image_in_bgra,cv2.COLOR_BGRA2BGR)
     # # process image
 
-    image_edit=cv2.circle(image,(imageWidth//2,imageHeight//2),min(imageHeight,imageWidth)//4,(26,181,0),2)
+    image_edit=cv2.circle(image_in_bgr,(imageWidth//2,imageHeight//2),min(imageHeight,imageWidth)//4,(26,181,0),2)
 
+    # image_bw=cv2.cvtColor(image_edit,cv2.COLOR_BGRA2GRAY)
+
+    # image_edit=cv2
 
     # # display image
 
-    image_out_arr=np.reshape(image_edit,imageHeight*imageWidth*4)
+    image_out_bgr=cv2.cvtColor(image_edit,cv2.COLOR_BGR2BGRA)
+    image_out_arr=image_out_bgr.flatten()
     image_out_list=list(image_out_arr)    
     image_out_raw=bytes(image_out_list)
     ir=display.imageNew(image_out_raw,Display.BGRA,imageWidth,imageHeight)
