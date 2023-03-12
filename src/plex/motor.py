@@ -1,10 +1,11 @@
 DIR_CLKWS=0
 DIR_ANTCLKWS=1
 class Motor:    
-    def __init__(self, motor_out1,motor_out2,enc_in) -> None:
-        self.motor_out1=motor_out1
-        self.motor_out2=motor_out2
-        self.enc_in=enc_in
+    def __init__(self, motor_out_A,motor_out_B,enc_in_A,enc_in_B) -> None:
+        self.motor_out_A=motor_out_A
+        self.motor_out_B=motor_out_B
+        self.enc_in_A=enc_in_A
+        self.enc_in_B=enc_in_B
         pass
 
     def set_dir(dir):
@@ -28,4 +29,3 @@ class Motor:
     def get_steps() -> None:
         pass
 
-    
