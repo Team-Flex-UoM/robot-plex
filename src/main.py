@@ -10,7 +10,7 @@ cam = Camera()
 line_follow.init(cam)
 
 while(True):
-    frame = line_follow.get_line_mask()
+    frame = line_follow.test()
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
