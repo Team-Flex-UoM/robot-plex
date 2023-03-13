@@ -5,7 +5,6 @@ import cv2
 
 # Robot nodes
 cam = Camera()
-
 # initializations
 line_follow.init(cam)
 
