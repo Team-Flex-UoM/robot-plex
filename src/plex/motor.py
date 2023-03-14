@@ -11,13 +11,15 @@ class Motor:
         GPIO.setup(motor_out_B, GPIO.OUT)
         GPIO.setup(enc_in_A, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #Enables the internal pull-down resistor
         GPIO.setup(enc_in_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #Enables the internal pull-down resistor
-        #call '_transitionOccurred' function whenever there is a transition (either from high to low or low to high) on the encoder input
-        GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
-        GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
+
+        # #call '_transitionOccurred' function whenever there is a transition (either from high to low or low to high) on the encoder input
+        # GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
+        # GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
 
         self.ena=ena
         self.motor_out_A=motor_out_A
         self.motor_out_B=motor_out_B
+        self.pwm = GPIO.PWM(motor_out_A, FREQUENCY)
         self.enc_in_A=enc_in_A
         self.enc_in_B=enc_in_B
         self.pos=0
@@ -56,14 +58,13 @@ class Motor:
 
     def set_dir(self,dir):
         if dir==DIR_CLKWS:
-            GPIO.output(self.motor_out_A,1)
             GPIO.output(self.motor_out_B,0)
         elif dir==DIR_ANTCLKWS:
-            GPIO.output(self.motor_out_A,0)
             GPIO.output(self.motor_out_B,1)
 
-    def set_speed(self,speed,dir) -> None:
-        pass
+    def set_speed(self,speed=0) -> None:
+        GPIO.output(self.ena, 1)
+        self.pwm.start(speed)
 
     def brake(self) -> None:
         GPIO.output(self.motor_out_A,1)
@@ -80,3 +81,8 @@ class Motor:
 
     def get_steps(self) -> None:
         return self.pos
+    
+    def __del__(self):
+        print('fe')
+        GPIO.cleanup()
+        
