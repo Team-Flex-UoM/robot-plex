@@ -28,7 +28,11 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
 
 def test():
     img = cam.get_frame()
-    # img = img[LINE_BOX[0][1]:LINE_BOX[1][1], LINE_BOX[0][0]:LINE_BOX[1][0], :]
-    # contour = get_line_contour(img)
-    # cv2.drawContours(img, [contour], 0, 1)
-    return get_bin_frame(img)
+    img = img[LINE_BOX[0][1]:LINE_BOX[1][1], LINE_BOX[0][0]:LINE_BOX[1][0], :]
+    contour = get_line_contour(img)
+    con = contour.reshape(contour.shape[0], -1)
+    arr = con[con[:, 1] > 245]
+    if len(arr) > 0:
+        cv2.circle(img, arr[0], 2,(255,0,0),3)
+
+    return img
