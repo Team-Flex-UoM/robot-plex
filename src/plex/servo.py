@@ -23,7 +23,7 @@ class Servo:
             for i in range(self.currentAngle, angle - 1, -1):
                 duty_cycle = 2 + (i/18)
                 self.pwm.ChangeDutyCycle(duty_cycle)
-                self.angle = i
+                self.currentAngle = i
                 time.sleep(0.05)
         
        
