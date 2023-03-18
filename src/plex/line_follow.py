@@ -3,7 +3,7 @@ import numpy as np
 
 from plex.camera import Camera
 
-LINE_BOX = ((100,150),(540,400)) # [(x1, y1), (x2, y2)]
+BOX = (440, 250, 320, 240) # (x,y,w,h)
 
 def init(cam_node: Camera) -> None:
     global cam
@@ -28,11 +28,11 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
 
 def test():
     img = cam.get_frame()
-    img = img[LINE_BOX[0][1]:LINE_BOX[1][1], LINE_BOX[0][0]:LINE_BOX[1][0], :]
-    contour = get_line_contour(img)
-    con = contour.reshape(contour.shape[0], -1)
-    arr = con[con[:, 1] > 245]
-    if len(arr) > 0:
-        cv2.circle(img, arr[0], 2,(255,0,0),3)
-
+    img = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
+    # contour = get_line_contour(img)
+    # con = contour.reshape(contour.shape[0], -1)
+    # arr = con[con[:, 1] > 245]
+    # if len(arr) > 0:
+    #     cv2.circle(img, arr[0], 2,(255,0,0),3)
+    # print(img.shape)
     return img
