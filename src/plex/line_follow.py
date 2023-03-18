@@ -78,9 +78,9 @@ def process_roi():
 
 
 
-    if len(arr) > 0:
-        cv2.circle(img, arr[0], 2,(255,0,0),3)
-    print(img.shape)
+    # if len(arr) > 0:
+    #     cv2.circle(img, arr[0], 2,(255,0,0),3)
+    # print(img.shape)
 
     # left edge
 
