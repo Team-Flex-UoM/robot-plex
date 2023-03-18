@@ -3,6 +3,8 @@ import numpy as np
 
 import plex.camera as camera
 from plex.camera import Camera
+import plex.motor_driver as motor_driver
+
 
 
 BOX = (camera.WIDTH//2, camera.HEIGHT//2, 320, 100) # (x,y,w,h)
@@ -10,6 +12,14 @@ BOX = (camera.WIDTH//2, camera.HEIGHT//2, 320, 100) # (x,y,w,h)
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
 BOX_HALF_HEIGHT=BOX_HEIGHT//2
+
+AVG_SPEED = 50
+KP = 0
+KI = 0
+KD = 0
+
+prev_error = 0
+acc_error = 0
 
 def init(cam_node: Camera) -> None:
     global cam
@@ -88,10 +98,6 @@ def process_roi(roi: np.ndarray):
 
     return frame
 
-
-
-
-
     # if len(arr) > 0:
     #     cv2.circle(img, arr[0], 2,(255,0,0),3)
     # print(img.shape)
@@ -102,13 +108,21 @@ def process_roi(roi: np.ndarray):
 
 
 
+def pid(error: int) -> None:
+    global prev_error
+    global acc_error
+
+    correction = KP*error + KI*(acc_error + error) + KD*(error - prev_error)
+    acc_error += error
+    prev_error = error
+
+    left_motor_velo = AVG_SPEED + correction
+    right_motor_velo = AVG_SPEED - correction
+
+    motor_driver.forward(left_motor_speed=left_motor_velo, right_motor_speed=right_motor_velo)
+
+
 def test():
     img = cam.get_frame()
     img = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
-    # contour = get_line_contour(img)
-    # con = contour.reshape(contour.shape[0], -1)
-    # arr = con[con[:, 1] > 245]
-    # if len(arr) > 0:
-    #     cv2.circle(img, arr[0], 2,(255,0,0),3)
-    # print(img.shape)
     return img
