@@ -4,7 +4,7 @@ DIR_ANTCLKWS=1
 FREQUENCY=50 #50Hz
 
 class Motor:    
-    def __init__(self,ena,motor_out_A,motor_out_B,enc_in_A,enc_in_B) -> None:
+    def __init__(self,ena,motor_out_A,motor_out_B,enc_in_A,enc_in_B,callback=None) -> None:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(ena, GPIO.OUT)
         GPIO.setup(motor_out_A, GPIO.OUT)
@@ -13,8 +13,8 @@ class Motor:
         GPIO.setup(enc_in_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #Enables the internal pull-down resistor
 
         # #call '_transitionOccurred' function whenever there is a transition (either from high to low or low to high) on the encoder input
-        # GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
-        # GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
+        GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
+        GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
 
         self.ena=ena
         self.motor_out_A=motor_out_A
@@ -24,6 +24,7 @@ class Motor:
         self.enc_in_B=enc_in_B
         self.pos=0
         self.state='00'
+        self.callback=callback
     
     def _transitionOccurred(self):
         p1 = GPIO.input(self.enc_in_A)
@@ -41,12 +42,16 @@ class Motor:
                 self.pos += 1
             elif newState == "00": # Turned left 1
                 self.pos -= 1
+                if self.callback is not None:
+                    self.callback(self.pos)
 
         elif self.state == "10": # R3 or L1
             if newState == "11": # Turned left 1
                 self.pos -= 1
             elif newState == "00": # Turned right 1
                 self.pos += 1
+                if self.callback is not None:
+                    self.callback(self.pos)
 
         else: # self.state == "11"
             if newState == "01": # Turned left 1
