@@ -1,13 +1,15 @@
 import cv2
 import numpy as np
 
+import plex.camera as camera
 from plex.camera import Camera
 
-BOX = (440, 250, 320, 100) # (x,y,w,h)
 
-BOX_WIDTH=BOX[2]
-BOX_HEIGHT=BOX[3]
+BOX = (camera.WIDTH//2, camera.HEIGHT//2, 320, 100) # (x,y,w,h)
+
+BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
+BOX_HALF_HEIGHT=BOX_HEIGHT//2
 
 def init(cam_node: Camera) -> None:
     global cam
@@ -26,7 +28,7 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
     bin_frame = get_bin_frame(frame)
     contours, _ = cv2.findContours(bin_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     max_contour = max(contours, key = cv2.contourArea)
-    print(max_contour)
+    # print(max_contour)
     return max_contour,bin_frame
 
 # def get_intersection(frame: )
@@ -35,16 +37,24 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
 
 def get_point(conts: np.ndarray, _axis: int):    
     return (np.amin(conts,axis=_axis)+np.amax(conts,axis=_axis))//2
-    
 
-def process_roi():
+def get_roi():
     img = cam.get_frame()
-    roi = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
+    # print(img.shape)
+    roi = np.array(img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :])
+    img=cv2.rectangle(img,(BOX_X-BOX_HALF_WIDTH,BOX_Y-BOX_HALF_HEIGHT),(BOX_X+BOX_HALF_WIDTH,BOX_Y+BOX_HALF_HEIGHT),(255,0,0),3)
+
+    img=cv2.circle(img,(BOX_X,BOX_Y),3,(0,0,255),3)
+    return roi,img
+
+
+def process_roi(roi: np.ndarray):    
     
     conts,frame = get_line_contour(roi)
     conts = conts.reshape(conts.shape[0], -1)
 
     left_edge = conts[conts[:, 1] < 2].size
+    
     # left_edge_line,left_edge_point=get_point(left_edge,0)
 
     right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)].size
