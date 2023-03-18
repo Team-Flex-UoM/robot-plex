@@ -3,7 +3,7 @@ import numpy as np
 
 from plex.camera import Camera
 
-BOX = (440, 250, 320, 240) # (x,y,w,h)
+BOX = (440, 250, 320, 100) # (x,y,w,h)
 
 BOX_WIDTH=BOX[2]
 BOX_HEIGHT=BOX[3]
@@ -26,7 +26,8 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
     bin_frame = get_bin_frame(frame)
     contours, _ = cv2.findContours(bin_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     max_contour = max(contours, key = cv2.contourArea)
-    return max_contour
+    print(max_contour)
+    return max_contour,bin_frame
 
 # def get_intersection(frame: )
 
@@ -40,18 +41,19 @@ def process_roi():
     img = cam.get_frame()
     roi = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
     
-    conts = get_line_contour(roi)
+    conts,frame = get_line_contour(roi)
     conts = conts.reshape(conts.shape[0], -1)
 
-    left_edge = conts[conts[:, 1] < 2]
+    left_edge = conts[conts[:, 1] < 2].size
     # left_edge_line,left_edge_point=get_point(left_edge,0)
 
-    right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)]
+    right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)].size
     # right_edge_line,right_edge_point=get_point(right_edge,0)
 
-    top_edge= conts[conts[:, 0] < 2]
+    top_edge= conts[conts[:, 0] < 2].size
 
-    bottom_edge=conts[conts[:, 0] > (BOX_HEIGHT-3)]
+    bottom_edge_points=conts[conts[:, 0] > (BOX_HEIGHT-3)]
+    bottom_edge=bottom_edge_points.size
 
     if bottom_edge:        
        
@@ -64,8 +66,8 @@ def process_roi():
         elif right_edge:
             print("turn right")
         else:
-            bottom_edge_point=get_point(bottom_edge,1)
-            error=bottom_edge_point-BOX_HALF_WIDTH
+            bottom_edge_mid_point=get_point(bottom_edge_points,1)
+            error=bottom_edge_mid_point-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH
 
 
@@ -73,6 +75,8 @@ def process_roi():
     else:
         # missed the line
         pass
+
+    return frame
 
 
 

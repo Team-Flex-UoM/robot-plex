@@ -17,7 +17,7 @@ class Camera:
 	def get_frame(self) -> np.ndarray:
 		ret, frame = self._cap.read()
 		assert ret, "There is an error while reading VideoCapture" # TODO: return blank frame if error occurred
-		frame = cv2.remap(frame, _MAP_1, _MAP_2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT) # fisheye cleaning
+		# frame = cv2.remap(frame, _MAP_1, _MAP_2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT) # fisheye cleaning
 		return frame
 	
 	def __del__(self):
