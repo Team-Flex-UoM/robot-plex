@@ -7,7 +7,7 @@ import plex.motor_driver as motor_driver
 
 
 
-BOX = (camera.WIDTH//2, camera.HEIGHT//2, 320, 100) # (x,y,w,h)
+BOX = (camera.WIDTH//2, 4*camera.HEIGHT//5, 320, 100) # (x,y,w,h)
 
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
@@ -59,7 +59,7 @@ def get_roi():
 
 def draw_points(img,points):
     for point in points:
-        cv2.circle(img,point,1,(0,255,0),1)
+        cv2.circle(img,point,3,(0,255,0),3)
 
 
 
@@ -68,32 +68,49 @@ def process_roi(roi: np.ndarray):
     conts,frame = get_line_contour(roi)
     conts = conts.reshape(conts.shape[0], -1)
 
-    left_edge = conts[conts[:, 1] < 2]
-    draw_points(roi,left_edge)
+    top_edge = conts[conts[:, 1] < 2]
+    # draw_points(roi,top_edge)
     
-    # left_edge_line,left_edge_point=get_point(left_edge,0)
-
-    right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)]
-    # right_edge_line,right_edge_point=get_point(right_edge,0)
-
-    top_edge= conts[conts[:, 0] < 2]
     
-    bottom_edge=conts[conts[:, 0] > (BOX_HEIGHT-3)]
+
+    bottom_edge=conts[conts[:, 1] > (BOX_HEIGHT-3)]
+    draw_points(roi,bottom_edge)
+   
+
+    left_edge= conts[conts[:, 0] < 2]
+    # draw_points(roi,left_edge)
+    
+    right_edge=conts[conts[:, 0] > (BOX_WIDTH-3)]
+    # draw_points(roi,right_edge)
 
     if bottom_edge.size:        
        
         if top_edge.size and left_edge.size and right_edge.size:
-            print("+ junction")
+            print("+")
+            pass
+        elif top_edge.size and left_edge.size:
+            print("TL")
+            pass
+        elif top_edge.size and right_edge.size:
+            print("TR")
+            pass
         elif left_edge.size and right_edge.size:
-            print("T junction")
+            print("T")
+            pass
         elif left_edge.size:
-            print("turn left")
+            print("L")
+            pass
         elif right_edge.size:
-            print("turn right")
-        else:
-            bottom_edge_mid_point=get_point(bottom_edge.size,1)
-            error=bottom_edge_mid_point-BOX_HALF_WIDTH
+            print("R")
+            pass
+        else:            
+            bottom_edge_mid_point=get_point(bottom_edge,0)
+            error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH
+            print(norm_error)
+            cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+        # TODO : Handle end of the line
+        
 
 
 
