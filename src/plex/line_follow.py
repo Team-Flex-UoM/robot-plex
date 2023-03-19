@@ -137,7 +137,7 @@ def pid(error: int) -> None:
 def test():
     roi,img=get_roi()
     bin_frame,norm_error=process_roi(roi)
-    print(norm_error)
+    # print(norm_error)
     cv2.imshow('img',img)
     cv2.imshow('roi',roi)
     cv2.imshow('frame',bin_frame)
