@@ -15,8 +15,8 @@ line_follow.init(cam_node=cam)
 motor_driver.init(left_motor_node=left_motor, right_motor_node=right_motor)
 
 while(True):
-    frame = line_follow.test()
-    cv2.imshow('frame', frame)
+    frame = line_follow.follow()
+    # cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     
