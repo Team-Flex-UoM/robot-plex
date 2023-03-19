@@ -57,36 +57,39 @@ def get_roi():
     img=cv2.circle(img,(BOX_X,BOX_Y),3,(0,0,255),3)
     return roi,img
 
+def draw_points(img,points):
+    pass
+
+
 
 def process_roi(roi: np.ndarray):    
     
     conts,frame = get_line_contour(roi)
     conts = conts.reshape(conts.shape[0], -1)
 
-    left_edge = conts[conts[:, 1] < 2].size
+    left_edge = conts[conts[:, 1] < 2]
     
     # left_edge_line,left_edge_point=get_point(left_edge,0)
 
-    right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)].size
+    right_edge=conts[conts[:, 1] > (BOX_WIDTH-3)]
     # right_edge_line,right_edge_point=get_point(right_edge,0)
 
-    top_edge= conts[conts[:, 0] < 2].size
+    top_edge= conts[conts[:, 0] < 2]
+    
+    bottom_edge=conts[conts[:, 0] > (BOX_HEIGHT-3)]
 
-    bottom_edge_points=conts[conts[:, 0] > (BOX_HEIGHT-3)]
-    bottom_edge=bottom_edge_points.size
-
-    if bottom_edge:        
+    if bottom_edge.size:        
        
-        if top_edge and left_edge and right_edge:
+        if top_edge.size and left_edge.size and right_edge.size:
             print("+ junction")
-        elif left_edge and right_edge:
+        elif left_edge.size and right_edge.size:
             print("T junction")
-        elif left_edge:
+        elif left_edge.size:
             print("turn left")
-        elif right_edge:
+        elif right_edge.size:
             print("turn right")
         else:
-            bottom_edge_mid_point=get_point(bottom_edge_points,1)
+            bottom_edge_mid_point=get_point(bottom_edge.size,1)
             error=bottom_edge_mid_point-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH
 
