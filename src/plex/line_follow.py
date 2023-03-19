@@ -135,9 +135,12 @@ def pid(error: int) -> None:
 
 
 def test():
-    img = cam.get_frame()
-    img = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
-    return img
+    roi,img=get_roi()
+    bin_frame,norm_error=process_roi(roi)
+    print(norm_error)
+    cv2.imshow('img',img)
+    cv2.imshow('roi',roi)
+    cv2.imshow('frame',bin_frame)
 
 def follow():
     roi,img=get_roi()

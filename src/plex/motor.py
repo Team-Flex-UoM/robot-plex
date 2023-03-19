@@ -13,8 +13,8 @@ class Motor:
         GPIO.setup(enc_in_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #Enables the internal pull-down resistor
 
         # #call '_transitionOccurred' function whenever there is a transition (either from high to low or low to high) on the encoder input
-        GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
-        GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
+        # GPIO.add_event_detect(enc_in_A, GPIO.BOTH, callback=self._transitionOccurred)
+        # GPIO.add_event_detect(enc_in_B, GPIO.BOTH, callback=self._transitionOccurred)
 
         self.ena=ena
         self.motor_out_A=motor_out_A
@@ -26,7 +26,7 @@ class Motor:
         self.state='00'
         self.callback=callback
     
-    def _transitionOccurred(self):
+    def _transitionOccurred(self,channel):
         p1 = GPIO.input(self.enc_in_A)
         p2 = GPIO.input(self.enc_in_B)
         newState = "{}{}".format(p1, p2)
@@ -89,5 +89,5 @@ class Motor:
     
     def __del__(self):
         print('fe')
-        GPIO.cleanup()
+        
         
