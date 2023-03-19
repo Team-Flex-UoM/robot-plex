@@ -65,7 +65,7 @@ def draw_points(img,points):
 
 def process_roi(roi: np.ndarray):    
     
-    conts,frame = get_line_contour(roi)
+    conts,bin_frame = get_line_contour(roi)
     conts = conts.reshape(conts.shape[0], -1)
 
     top_edge = conts[conts[:, 1] < 2]
@@ -85,50 +85,40 @@ def process_roi(roi: np.ndarray):
 
     if bottom_edge.size:        
        
-        if top_edge.size and left_edge.size and right_edge.size:
-            print("+")
-            pass
-        elif top_edge.size and left_edge.size:
-            print("TL")
-            pass
-        elif top_edge.size and right_edge.size:
-            print("TR")
-            pass
-        elif left_edge.size and right_edge.size:
-            print("T")
-            pass
-        elif left_edge.size:
-            print("L")
-            pass
-        elif right_edge.size:
-            print("R")
-            pass
-        else:            
-            bottom_edge_mid_point=get_point(bottom_edge,0)
-            error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
-            norm_error=error/BOX_HALF_WIDTH
-            print(norm_error)
-            cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+        # if top_edge.size and left_edge.size and right_edge.size:
+        #     print("+")
+        #     pass
+        # elif top_edge.size and left_edge.size:
+        #     print("TL")
+        #     pass
+        # elif top_edge.size and right_edge.size:
+        #     print("TR")
+        #     pass
+        # elif left_edge.size and right_edge.size:
+        #     print("T")
+        #     pass
+        # elif left_edge.size:
+        #     print("L")
+        #     pass
+        # elif right_edge.size:
+        #     print("R")
+        #     pass
+        # else:            
+        bottom_edge_mid_point=get_point(bottom_edge,0)
+        error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
+        norm_error=error/BOX_HALF_WIDTH
+        print(norm_error)
+        cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
         # TODO : Handle end of the line
-        
+        return bin_frame,norm_error
 
 
 
     else:
-        # missed the line
+        # TODO : Handle end of miss the line with checking otsu thresold
         pass
 
-    return frame
-
-    # if len(arr) > 0:
-    #     cv2.circle(img, arr[0], 2,(255,0,0),3)
-    # print(img.shape)
-
-    # left edge
-
-
-
-
+    return bin_frame,0
 
 def pid(error: int) -> None:
     global prev_error
@@ -148,3 +138,13 @@ def test():
     img = cam.get_frame()
     img = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
     return img
+
+def follow():
+    roi,img=get_roi()
+    bin_frame,norm_error=process_roi(roi)
+    pid(norm_error)
+    cv2.imshow('img',img)
+    cv2.imshow('roi',roi)
+    cv2.imshow('frame',bin_frame)
+
+
