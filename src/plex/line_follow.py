@@ -58,7 +58,8 @@ def get_roi():
     return roi,img
 
 def draw_points(img,points):
-    pass
+    for point in points:
+        cv2.circle(img,point,1,(0,255,0),1)
 
 
 
@@ -68,6 +69,7 @@ def process_roi(roi: np.ndarray):
     conts = conts.reshape(conts.shape[0], -1)
 
     left_edge = conts[conts[:, 1] < 2]
+    draw_points(roi,left_edge)
     
     # left_edge_line,left_edge_point=get_point(left_edge,0)
 
