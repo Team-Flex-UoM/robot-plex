@@ -7,6 +7,7 @@ import RPi.GPIO as GPIO
 import cv2
 from time import sleep
 
+
 # Robot nodes
 cam = camera.Camera()
 left_motor = motor.Motor(2, 18, 3, 4, 14)
@@ -16,19 +17,19 @@ right_motor = motor.Motor(26, 12, 16, 20, 21)
 line_follow.init(cam_node=cam)
 motor_driver.init(left_motor_node=left_motor, right_motor_node=right_motor)
 
-i=0
-while(True):
-    frame = cam.get_frame()
-    cv2.imshow('frame', frame)
-    # cv2.imwrite('imgs/{}.png'.format(i),frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        cv2.imwrite('{}.png'.format(i),frame)
-        i+=1
-        print(i)
+# i=0
+# while(True):
+#     frame = cam.get_frame()
+#     cv2.imshow('frame', frame)
+#     # cv2.imwrite('imgs/{}.png'.format(i),frame)
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         cv2.imwrite('{}.png'.format(i),frame)
+#         i+=1
+#         print(i)
       
     
-    # sleep(2)
-cv2.destroyAllWindows()
+#     # sleep(2)
+# cv2.destroyAllWindows()
     
 
 
@@ -39,5 +40,47 @@ cv2.destroyAllWindows()
 # sleep(2)
 # GPIO.cleanup()
 
-# line_follow.test()
+# line_follow.follow()
 # cam.record()
+
+# i=0
+try:
+    while(True):
+        line_follow.follow()
+except KeyboardInterrupt: pass
+    
+
+# left_motor.set_dir(motor.DIR_ANTCLKWS)
+# print("set dir")
+# sleep(2)
+# left_motor.set_speed(20)
+# print("set speed")
+# sleep(2)
+# left_motor.start()
+# print("start")
+# sleep(2)
+# left_motor.stop()
+# print("stop")
+
+# right_motor.set_dir(motor.DIR_ANTCLKWS)
+# print("set dir")
+# sleep(2)
+# right_motor.set_speed(20)
+# print("set speed")
+# sleep(2)
+# right_motor.start()
+# print("start")
+# sleep(2)
+# right_motor.stop()
+# print("stop")
+
+# motor_driver.forward(20,20)
+
+
+
+# input()
+# while :pass
+
+GPIO.cleanup()    
+# cv2.destroyAllWindows()
+    

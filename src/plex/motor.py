@@ -25,6 +25,10 @@ class Motor:
         self.pos=0
         self.state='00'
         self.callback=callback
+
+        GPIO.output(self.ena,0)
+
+
     
     def _transitionOccurred(self,channel):
         p1 = GPIO.input(self.enc_in_A)
@@ -68,7 +72,7 @@ class Motor:
             GPIO.output(self.motor_out_B,1)
 
     def set_speed(self,speed=0) -> None:
-        GPIO.output(self.ena, 1)
+        # GPIO.output(self.ena, 1)
         self.pwm.start(speed)
 
     def brake(self) -> None:

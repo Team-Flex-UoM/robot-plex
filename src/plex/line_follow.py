@@ -7,14 +7,14 @@ import plex.motor_driver as motor_driver
 
 
 
-BOX = (camera.WIDTH//2, 4*camera.HEIGHT//5, 320, 100) # (x,y,w,h)
+BOX = (camera.WIDTH//2, 3*camera.HEIGHT//5, camera.WIDTH, 200) # (x,y,w,h)
 
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
 BOX_HALF_HEIGHT=BOX_HEIGHT//2
 
-AVG_SPEED = 50
-KP = 0
+AVG_SPEED = 12
+KP = 5
 KI = 0
 KD = 0
 
@@ -37,9 +37,10 @@ def get_bin_frame(frame: np.ndarray) -> np.ndarray:
 def get_line_contour(frame: np.ndarray) -> np.ndarray:
     bin_frame = get_bin_frame(frame)
     contours, _ = cv2.findContours(bin_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    max_contour = max(contours, key = cv2.contourArea)
-    # print(max_contour)
-    return max_contour,bin_frame
+    if len(contours):
+        max_contour = max(contours, key = cv2.contourArea) # TODO : check is empty conts
+        return 1,max_contour,bin_frame
+    return 0,0,bin_frame
 
 # def get_intersection(frame: )
 
@@ -65,60 +66,62 @@ def draw_points(img,points):
 
 def process_roi(roi: np.ndarray):    
     
-    conts,bin_frame = get_line_contour(roi)
-    conts = conts.reshape(conts.shape[0], -1)
+    is_max_cont,max_cont,bin_frame = get_line_contour(roi)
 
-    top_edge = conts[conts[:, 1] < 2]
-    # draw_points(roi,top_edge)
+    if is_max_cont:
+        max_cont = max_cont.reshape(max_cont.shape[0], -1)
+
+        top_edge = max_cont[max_cont[:, 1] < 2]
+        # draw_points(roi,top_edge)
+        
+        
+
+        bottom_edge=max_cont[max_cont[:, 1] > (BOX_HEIGHT-3)]
+        draw_points(roi,bottom_edge)
     
-    
 
-    bottom_edge=conts[conts[:, 1] > (BOX_HEIGHT-3)]
-    draw_points(roi,bottom_edge)
-   
+        left_edge= max_cont[max_cont[:, 0] < 2]
+        # draw_points(roi,left_edge)
+        
+        right_edge=max_cont[max_cont[:, 0] > (BOX_WIDTH-3)]
+        # draw_points(roi,right_edge)
 
-    left_edge= conts[conts[:, 0] < 2]
-    # draw_points(roi,left_edge)
-    
-    right_edge=conts[conts[:, 0] > (BOX_WIDTH-3)]
-    # draw_points(roi,right_edge)
-
-    if bottom_edge.size:        
-       
-        # if top_edge.size and left_edge.size and right_edge.size:
-        #     print("+")
-        #     pass
-        # elif top_edge.size and left_edge.size:
-        #     print("TL")
-        #     pass
-        # elif top_edge.size and right_edge.size:
-        #     print("TR")
-        #     pass
-        # elif left_edge.size and right_edge.size:
-        #     print("T")
-        #     pass
-        # elif left_edge.size:
-        #     print("L")
-        #     pass
-        # elif right_edge.size:
-        #     print("R")
-        #     pass
-        # else:            
-        bottom_edge_mid_point=get_point(bottom_edge,0)
-        error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
-        norm_error=error/BOX_HALF_WIDTH
-        print(norm_error)
-        cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
-        # TODO : Handle end of the line
-        return bin_frame,norm_error
+        if bottom_edge.size:        
+        
+            # if top_edge.size and left_edge.size and right_edge.size:
+            #     print("+")
+            #     pass
+            # elif top_edge.size and left_edge.size:
+            #     print("TL")
+            #     pass
+            # elif top_edge.size and right_edge.size:
+            #     print("TR")
+            #     pass
+            # elif left_edge.size and right_edge.size:
+            #     print("T")
+            #     pass
+            # elif left_edge.size:
+            #     print("L")
+            #     pass
+            # elif right_edge.size:
+            #     print("R")
+            #     pass
+            # else:            
+            bottom_edge_mid_point=get_point(bottom_edge,0)
+            error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
+            norm_error=error/BOX_HALF_WIDTH
+            # print(norm_error)
+            cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+            # TODO : Handle end of the line
+            return 1,bin_frame,norm_error
 
 
 
-    else:
-        # TODO : Handle end of miss the line with checking otsu thresold
-        pass
+        else:
+            # TODO : Handle end of miss the line with checking otsu thresold
+            pass
 
-    return bin_frame,0
+    return 0,bin_frame,0
 
 def pid(error: int) -> None:
     global prev_error
@@ -130,6 +133,8 @@ def pid(error: int) -> None:
 
     left_motor_velo = AVG_SPEED + correction
     right_motor_velo = AVG_SPEED - correction
+
+    # print("L:",left_motor_velo,"\t, R:",right_motor_velo)
 
     motor_driver.forward(left_motor_speed=left_motor_velo, right_motor_speed=right_motor_velo)
 
@@ -144,10 +149,10 @@ def test():
 
 def follow():
     roi,img=get_roi()
-    bin_frame,norm_error=process_roi(roi)
-    pid(norm_error)
-    cv2.imshow('img',img)
-    cv2.imshow('roi',roi)
-    cv2.imshow('frame',bin_frame)
+    is_max_cont,bin_frame,norm_error=process_roi(roi)
+    if is_max_cont: pid(norm_error)
+    # cv2.imshow('img',img)
+    # cv2.imshow('roi',roi)
+    # cv2.imshow('frame',bin_frame)
 
 
