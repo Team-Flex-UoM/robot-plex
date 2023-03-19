@@ -30,6 +30,7 @@ class Camera:
 			cv2.imwrite('imgs/{}.png'.format(i),frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
+			i+=1
 			sleep(1)
 			
 	
