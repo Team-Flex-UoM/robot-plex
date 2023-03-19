@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from time import sleep
 
 # Class constants
 WIDTH = 640
@@ -19,6 +20,18 @@ class Camera:
 		assert ret, "There is an error while reading VideoCapture" # TODO: return blank frame if error occurred
 		# frame = cv2.remap(frame, _MAP_1, _MAP_2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT) # fisheye cleaning
 		return frame
+
+	def record(self):
+		
+		i=0
+		while(True):
+			frame = self.get_frame()
+			cv2.imshow('frame', frame)
+			cv2.imwrite('imgs/{}.png'.format(i),frame)
+			if cv2.waitKey(1) & 0xFF == ord('q'):
+				break
+			sleep(1)
+			
 	
 	def __del__(self):
 		self._cap.release()
