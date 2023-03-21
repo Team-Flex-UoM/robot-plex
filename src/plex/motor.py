@@ -36,7 +36,7 @@ class Motor:
         out_speed = KP*error + KI*(acc_error + error) + KD*(error - prev_error)
         acc_error += error
         prev_error = error
-        print(ref_speed, self.encoder.speed)
+        # print(ref_speed, self.encoder.speed)
         return out_speed
 
     def set_dir(self, dir) -> None:
