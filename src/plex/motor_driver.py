@@ -7,7 +7,7 @@ LEFT = 1
 RIGHT = 2
 BACK=3
 
-TURN_SPEED = 15
+TURN_SPEED = 30
 TURN_ENC_COUNT = 100
 
 is_running = False
@@ -34,41 +34,31 @@ def backward(left_motor_speed, right_motor_speed) -> None:
     left_motor.start()
     right_motor.start()
 
-# def turn(dir: int) -> None:
-#     if dir == LEFT:
-#         left_motor.set_dir(motor.DIR_ANTCLKWS)
-#         right_motor.set_dir(motor.DIR_CLKWS)
-#     else:
-#         left_motor.set_dir(motor.DIR_ANTCLKWS)
-#         right_motor.set_dir(motor.DIR_CLKWS)
+def turn(dir: int) -> None:
+    kick(dir)
     
-#     left_motor.set_speed(TURN_SPEED)
-#     right_motor.set_speed(TURN_SPEED)
-#     right_encoder.steps = 0
-#     left_motor.start()
-#     right_motor.start()
-#     while right_encoder.steps <= TURN_ENC_COUNT:
-#         continue
-#     left_motor.stop()
-#     right_motor.stop()
+    left_motor.set_speed(TURN_SPEED)
+    right_motor.set_speed(TURN_SPEED)
+    left_motor.start()
+    right_motor.start()
+    wait(TURN_ENC_COUNT)
+    left_motor.stop()
+    right_motor.stop()
 
-# def go_distance(dis: int):
-#     if dir > 0:
-#         left_motor.set_dir(motor.DIR_ANTCLKWS)
-#         right_motor.set_dir(motor.DIR_ANTCLKWS)
-#     else:
-#         left_motor.set_dir(motor.DIR_CLKWS)
-#         right_motor.set_dir(motor.DIR_CLKWS)
-    
-#     left_motor.set_speed(TURN_SPEED)
-#     right_motor.set_speed(TURN_SPEED)
-#     right_encoder.steps = 0
-#     left_motor.start()
-#     right_motor.start()
-#     while right_encoder.steps <= TURN_ENC_COUNT:
-#         continue
-#     left_motor.stop()
-#     right_motor.stop()
+def go_distance(dis: int):
+    kick(dir)
+    left_motor.set_speed(TURN_SPEED)
+    right_motor.set_speed(TURN_SPEED)
+    left_motor.start()
+    right_motor.start()
+    wait(TURN_ENC_COUNT)
+    left_motor.stop()
+    right_motor.stop()
+
+def wait(encoder_count):
+    right_motor.encoder.steps = 0
+    while right_motor.encoder.steps <= encoder_count:
+        continue
 
 
 def kick(dir: int) -> None:
@@ -93,11 +83,12 @@ def kick(dir: int) -> None:
     
     left_motor.set_speed(50)
     right_motor.set_speed(50)
-    left_motor.start()    
+    left_motor.start()
     right_motor.start()
     sleep(0.4)
 
 def stop():
+    global is_running
     left_motor.stop()
     right_motor.stop()
     is_running=False
