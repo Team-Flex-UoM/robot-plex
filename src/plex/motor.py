@@ -14,7 +14,7 @@ prev_error = 0
 acc_error = 0
 
 class Motor:    
-    def __init__(self, ena, motor_out_A, motor_out_B, encoder_node: encoder.Encoder) -> None:
+    def __init__(self, ena, motor_out_A, motor_out_B) -> None:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(ena, GPIO.OUT)
         GPIO.setup(motor_out_A, GPIO.OUT)
@@ -23,21 +23,9 @@ class Motor:
         self.ena=ena
         self.motor_out_A=motor_out_A
         self.motor_out_B=motor_out_B
-        self.encoder = encoder_node
 
         self.pwm = GPIO.PWM(motor_out_A, FREQUENCY)
         self.pwm.start(0)      
-    
-    def pid(self, ref_speed):
-        global prev_error
-        global acc_error
-
-        error = ref_speed - self.encoder.speed
-        out_speed = KP*error + KI*(acc_error + error) + KD*(error - prev_error)
-        acc_error += error
-        prev_error = error
-        # print(ref_speed, self.encoder.speed)
-        return out_speed
 
     def set_dir(self, dir) -> None:
         GPIO.output(self.motor_out_B, dir)

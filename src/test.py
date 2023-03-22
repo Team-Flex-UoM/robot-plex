@@ -24,17 +24,17 @@
 
 
 import plex.motor as motor
-from plex.encoder import Encoder
 import plex.motor_driver as motor_driver
+from gpiozero import RotaryEncoder
 from time import sleep,time
-en = Encoder(20, 21)
-en1 = Encoder(4,14)
-left_motor = motor.Motor(26, 12, 16, en)
-right_motor = motor.Motor(2, 18, 3, en1)
 
-motor_driver.init(left_motor, right_motor)
+left_motor = motor.Motor(26, 12, 16)
+right_motor = motor.Motor(2, 18, 3)
+left_encoder = RotaryEncoder(20, 21)
+right_encoder = RotaryEncoder(4, 14)
 
-motor_driver.backward(30,30)
+motor_driver.init(left_motor, right_motor, left_encoder, right_encoder)
+motor_driver.turn(motor_driver.LEFT)
 
 
 while True:

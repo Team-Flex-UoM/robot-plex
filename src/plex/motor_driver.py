@@ -12,13 +12,16 @@ TURN_ENC_COUNT = 100
 
 is_running = False
 
-def init(left_motor_node: motor.Motor, right_motor_node: motor.Motor) -> None:
+def init(left_motor_node: motor.Motor, right_motor_node: motor.Motor, left_encoder_node: RotaryEncoder, right_encoder_node: RotaryEncoder) -> None:
     global left_motor
     global right_motor
+    global left_encoder
+    global right_encoder
 
     left_motor = left_motor_node
     right_motor = right_motor_node
-
+    left_encoder = left_encoder_node
+    right_encoder = right_encoder_node
 
 def forward(left_motor_speed, right_motor_speed) -> None:
     kick(AHEAD)
@@ -56,8 +59,8 @@ def go_distance(dis: int):
     right_motor.stop()
 
 def wait(encoder_count):
-    right_motor.encoder.steps = 0
-    while right_motor.encoder.steps <= encoder_count:
+    right_encoder.steps = 0
+    while right_encoder.steps <= encoder_count:
         continue
 
 
@@ -85,7 +88,7 @@ def kick(dir: int) -> None:
     right_motor.set_speed(50)
     left_motor.start()
     right_motor.start()
-    sleep(0.4)
+    wait(20)
 
 def stop():
     global is_running
