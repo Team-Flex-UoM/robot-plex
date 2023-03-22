@@ -94,39 +94,46 @@ def process_roi(roi: np.ndarray):
    
         if bottom_edge.size:        
         
-            if top_edge.size and left_edge.size and right_edge.size:
-                # print("+")
-                return JUNCTN_CROSS,bin_frame,None
-                pass
-            elif top_edge.size and left_edge.size:
-                # print("TL")
-                return JUNCTN_T_LEFT,bin_frame,None
-                pass
-            elif top_edge.size and right_edge.size:
-                # print("TR")
-                return JUNCTN_T_RIGHT,bin_frame,None
-                pass
-            elif left_edge.size and right_edge.size:
-                # print("TN")
-                return JUNCTN_T_NORM,bin_frame,None
-                pass
-            elif left_edge.size:
-                # print("L")
-                return JUNCTN_L_LEFT,bin_frame,None
-                pass
-            elif right_edge.size:
-                # print("R")
-                return JUNCTN_L_RIGHT,bin_frame,None
-                pass
-            elif top_edge.size:            
-                bottom_edge_mid_point=get_point(bottom_edge,0)
-                error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
-                norm_error=error/BOX_HALF_WIDTH
-                # print(norm_error)
-                cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
-                return JUNCTN_NONE,bin_frame,norm_error
-            else:
-                return JUNCTN_END,bin_frame,None
+            # if top_edge.size and left_edge.size and right_edge.size:
+            #     # print("+")
+            #     return JUNCTN_CROSS,bin_frame,None
+            #     pass
+            # elif top_edge.size and left_edge.size:
+            #     # print("TL")
+            #     return JUNCTN_T_LEFT,bin_frame,None
+            #     pass
+            # elif top_edge.size and right_edge.size:
+            #     # print("TR")
+            #     return JUNCTN_T_RIGHT,bin_frame,None
+            #     pass
+            # elif left_edge.size and right_edge.size:
+            #     # print("TN")
+            #     return JUNCTN_T_NORM,bin_frame,None
+            #     pass
+            # elif left_edge.size:
+            #     # print("L")
+            #     return JUNCTN_L_LEFT,bin_frame,None
+            #     pass
+            # elif right_edge.size:
+            #     # print("R")
+            #     return JUNCTN_L_RIGHT,bin_frame,None
+            #     pass
+            # elif top_edge.size:            
+            #     bottom_edge_mid_point=get_point(bottom_edge,0)
+            #     error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
+            #     norm_error=error/BOX_HALF_WIDTH
+            #     # print(norm_error)
+            #     cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+            #     return JUNCTN_NONE,bin_frame,norm_error
+            # else:
+            #     return JUNCTN_END,bin_frame,None
+
+            # only for pid tune
+            bottom_edge_mid_point=get_point(bottom_edge,0)
+            error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
+            norm_error=error/BOX_HALF_WIDTH            
+            cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+            return JUNCTN_NONE,bin_frame,norm_error    
 
     else:
         # TODO : Handle end of miss the line with checking otsu thresold
@@ -152,8 +159,11 @@ def pid(error: int) -> None:
 
 def test():
     roi,img=get_roi()
-    bin_frame,norm_error=process_roi(roi)
-    # print(norm_error)
+    junctn,bin_frame,norm_error=process_roi(roi)
+    if junctn>0:
+        pid(norm_error)
+    else:
+        print("line miss")
     cv2.imshow('img',img)
     cv2.imshow('roi',roi)
     cv2.imshow('frame',bin_frame)
