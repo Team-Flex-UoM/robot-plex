@@ -3,8 +3,8 @@ import numpy as np
 from time import sleep
 
 # Class constants
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 32
+HEIGHT = 32
 _K = np.array([[258.22452392587803, 0.0, 310.227356524318], [0.0, 258.41055987158467, 229.22622290238198], [0.0, 0.0, 1.0]])
 _D = np.array([[0.03926573368675932], [-0.012201178250275507], [-0.008355412357037958], [0.0027249791614959665]])
 _MAP_1, _MAP_2 = cv2.fisheye.initUndistortRectifyMap(_K, _D, np.eye(3), _K, (WIDTH, HEIGHT), cv2.CV_16SC2)
@@ -12,7 +12,9 @@ _MAP_1, _MAP_2 = cv2.fisheye.initUndistortRectifyMap(_K, _D, np.eye(3), _K, (WID
 class Camera:
 	def __init__(self):
 		# private
-		self._cap = cv2.VideoCapture(0)
+		self._cap = cv2.VideoCapture(0,cv2.CAP_ANY)
+		self._cap.set(cv2.CAP_PROP_FRAME_WIDTH,WIDTH)
+		self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT,HEIGHT)
 		# public
 	
 	def get_frame(self) -> np.ndarray:

@@ -7,7 +7,7 @@ import plex.motor_driver as motor_driver
 
 
 
-BOX = (camera.WIDTH//2, 3*camera.HEIGHT//5, camera.WIDTH, 200) # (x,y,w,h)
+BOX = (camera.WIDTH//2, camera.HEIGHT//3, 4*camera.WIDTH//5, 8) # (x,y,w,h)
 
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
@@ -25,7 +25,7 @@ JUNCTN_CROSS=6
 JUNCTN_END=7
 
 AVG_SPEED = 30
-KP = 20
+KP = 60
 KI = 0
 KD = 0
 
@@ -41,8 +41,8 @@ def get_bin_frame(frame: np.ndarray) -> np.ndarray:
     ret, bin_frame = cv2.threshold(gray_frame, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # morphology
-    bin_frame = cv2.morphologyEx(bin_frame, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(5,5)))
-    bin_frame = cv2.morphologyEx(bin_frame, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT,(5,5)))
+    bin_frame = cv2.morphologyEx(bin_frame, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(3,3)))
+    bin_frame = cv2.morphologyEx(bin_frame, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT,(3,3)))
     return bin_frame
 
 def get_line_contour(frame: np.ndarray) -> np.ndarray:
@@ -63,15 +63,15 @@ def get_point(conts: np.ndarray, _axis: int):
 def get_roi():
     img = cam.get_frame()
     # print(img.shape)
-    roi = np.array(img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :])
-    # img=cv2.rectangle(img,(BOX_X-BOX_HALF_WIDTH,BOX_Y-BOX_HALF_HEIGHT),(BOX_X+BOX_HALF_WIDTH,BOX_Y+BOX_HALF_HEIGHT),(255,0,0),3)
+    roi = img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :]
+    img=cv2.rectangle(img,(BOX_X-BOX_HALF_WIDTH,BOX_Y-BOX_HALF_HEIGHT),(BOX_X+BOX_HALF_WIDTH,BOX_Y+BOX_HALF_HEIGHT),(255,0,0),1)
 
-    # img=cv2.circle(img,(BOX_X,BOX_Y),3,(0,0,255),3)
+    img=cv2.circle(img,(BOX_X,BOX_Y),1,(0,0,255),1)
     return roi,img
 
 def draw_points(img,points):
     for point in points:
-        cv2.circle(img,point,3,(0,255,0),3)
+        cv2.circle(img,point,1,(0,255,0),1)
 
 def process_roi(roi: np.ndarray):    
     
@@ -81,7 +81,7 @@ def process_roi(roi: np.ndarray):
         max_cont = max_cont.reshape(max_cont.shape[0], -1)
 
         top_edge = max_cont[max_cont[:, 1] < 2]
-        # draw_points(roi,top_edge)
+        draw_points(roi,top_edge)
 
         bottom_edge=max_cont[max_cont[:, 1] > (BOX_HEIGHT-3)]
         # draw_points(roi,bottom_edge)
@@ -132,7 +132,7 @@ def process_roi(roi: np.ndarray):
             top_edge_mid_point=get_point(top_edge,0)
             error=top_edge_mid_point[0]-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH            
-            cv2.circle(roi,top_edge_mid_point,3,(0,255,255),3)
+            # cv2.circle(roi,top_edge_mid_point,1,(0,255,255),1)
             return JUNCTN_NONE,bin_frame,norm_error    
 
     else:

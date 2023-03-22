@@ -41,8 +41,7 @@ cam = camera.Camera()
 motor_driver.init(left_motor, right_motor, left_encoder, right_encoder)
 line_follow.init(cam)
 try:
-    while True:        
-        line_follow.test()
+    motor_driver.turn(motor_driver.RIGHT)
     # frame=cam.get_frame()
     # print(frame.shape)
     # cv2.imshow("a",frame)
