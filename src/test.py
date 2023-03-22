@@ -29,6 +29,7 @@ import plex.line_follow as line_follow
 import plex.camera as camera
 from gpiozero import RotaryEncoder
 from time import sleep,time
+import cv2
 
 left_motor = motor.Motor(26, 12, 16)
 right_motor = motor.Motor(2, 18, 3)
@@ -40,10 +41,8 @@ motor_driver.init(left_motor, right_motor, left_encoder, right_encoder)
 line_follow.init(cam)
 
 while True:
-    # left_motor.set_speed(50)
-    # left_motor.start()
-    # right_motor.set_speed(50)
-    # right_motor.start()
-    pass
+    line_follow.test()
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         break
 
-
+# cv2.destroyAllWindows()

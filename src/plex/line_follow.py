@@ -24,8 +24,8 @@ JUNCTN_T_RIGHT=5
 JUNCTN_CROSS=6
 JUNCTN_END=7
 
-AVG_SPEED = 50
-KP = 0
+AVG_SPEED = 30
+KP = 20
 KI = 0
 KD = 0
 
@@ -64,9 +64,9 @@ def get_roi():
     img = cam.get_frame()
     # print(img.shape)
     roi = np.array(img[BOX[1] - BOX[3]//2: BOX[1] + BOX[3]//2, BOX[0] - BOX[2]//2: BOX[0] + BOX[2]//2, :])
-    img=cv2.rectangle(img,(BOX_X-BOX_HALF_WIDTH,BOX_Y-BOX_HALF_HEIGHT),(BOX_X+BOX_HALF_WIDTH,BOX_Y+BOX_HALF_HEIGHT),(255,0,0),3)
+    # img=cv2.rectangle(img,(BOX_X-BOX_HALF_WIDTH,BOX_Y-BOX_HALF_HEIGHT),(BOX_X+BOX_HALF_WIDTH,BOX_Y+BOX_HALF_HEIGHT),(255,0,0),3)
 
-    img=cv2.circle(img,(BOX_X,BOX_Y),3,(0,0,255),3)
+    # img=cv2.circle(img,(BOX_X,BOX_Y),3,(0,0,255),3)
     return roi,img
 
 def draw_points(img,points):
@@ -84,7 +84,7 @@ def process_roi(roi: np.ndarray):
         # draw_points(roi,top_edge)
 
         bottom_edge=max_cont[max_cont[:, 1] > (BOX_HEIGHT-3)]
-        draw_points(roi,bottom_edge)
+        # draw_points(roi,bottom_edge)
 
         left_edge= max_cont[max_cont[:, 0] < 2]
         # draw_points(roi,left_edge)
@@ -92,7 +92,7 @@ def process_roi(roi: np.ndarray):
         right_edge=max_cont[max_cont[:, 0] > (BOX_WIDTH-3)]
         # draw_points(roi,right_edge)
    
-        if bottom_edge.size:        
+        if top_edge.size:        
         
             # if top_edge.size and left_edge.size and right_edge.size:
             #     # print("+")
@@ -129,10 +129,10 @@ def process_roi(roi: np.ndarray):
             #     return JUNCTN_END,bin_frame,None
 
             # only for pid tune
-            bottom_edge_mid_point=get_point(bottom_edge,0)
-            error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
+            top_edge_mid_point=get_point(top_edge,0)
+            error=top_edge_mid_point[0]-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH            
-            cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
+            cv2.circle(roi,top_edge_mid_point,3,(0,255,255),3)
             return JUNCTN_NONE,bin_frame,norm_error    
 
     else:
@@ -152,7 +152,7 @@ def pid(error: int) -> None:
     left_motor_velo = AVG_SPEED + correction
     right_motor_velo = AVG_SPEED - correction
 
-    # print("L:",left_motor_velo,"\t, R:",right_motor_velo)
+    print("L:",left_motor_velo,"\t, R:",right_motor_velo,"er:",error)
 
     motor_driver.forward(left_motor_speed=left_motor_velo, right_motor_speed=right_motor_velo)
 
@@ -160,13 +160,13 @@ def pid(error: int) -> None:
 def test():
     roi,img=get_roi()
     junctn,bin_frame,norm_error=process_roi(roi)
-    if junctn>0:
+    if junctn>=0:
         pid(norm_error)
     else:
         print("line miss")
-    cv2.imshow('img',img)
-    cv2.imshow('roi',roi)
-    cv2.imshow('frame',bin_frame)
+    # cv2.imshow('img',img)
+    # cv2.imshow('roi',roi)
+    # cv2.imshow('frame',bin_frame)
 
 def follow():
     roi,img=get_roi()
@@ -175,9 +175,9 @@ def follow():
         junctn,bin_frame,norm_error=process_roi(roi)
         if junctn>0:break
         pid(norm_error)
-        cv2.imshow('img',img)
-        cv2.imshow('roi',roi)
-        cv2.imshow('frame',bin_frame)
+        # cv2.imshow('img',img)
+        # cv2.imshow('roi',roi)
+        # cv2.imshow('frame',bin_frame)
 
     return junctn
 
