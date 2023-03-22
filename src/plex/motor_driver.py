@@ -8,7 +8,7 @@ RIGHT = 2
 BACK=3
 
 TURN_SPEED = 30
-TURN_ENC_COUNT = 100
+TURN_ENC_COUNT = 50
 
 is_running = False
 
@@ -60,7 +60,7 @@ def go_distance(dis: int):
 
 def wait(encoder_count):
     right_encoder.steps = 0
-    while right_encoder.steps <= encoder_count:
+    while abs(right_encoder.steps) <= encoder_count:
         continue
 
 
