@@ -7,7 +7,7 @@ import plex.motor_driver as motor_driver
 
 
 
-BOX = (camera.WIDTH//2, 4*camera.HEIGHT//5, 320, 100) # (x,y,w,h)
+BOX = (camera.WIDTH//2, 3*camera.HEIGHT//5, camera.WIDTH, 200) # (x,y,w,h)
 
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
@@ -49,9 +49,10 @@ def get_bin_frame(frame: np.ndarray) -> np.ndarray:
 def get_line_contour(frame: np.ndarray) -> np.ndarray:
     bin_frame = get_bin_frame(frame)
     contours, _ = cv2.findContours(bin_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    max_contour = max(contours, key = cv2.contourArea)
-    # print(max_contour)
-    return max_contour,bin_frame
+    if len(contours):
+        max_contour = max(contours, key = cv2.contourArea) # TODO : check is empty conts
+        return 1,max_contour,bin_frame
+    return 0,0,bin_frame
 
 # def get_intersection(frame: )
 
@@ -77,15 +78,25 @@ def draw_points(img,points):
 
 def process_roi(roi: np.ndarray):    
     
-    conts,bin_frame = get_line_contour(roi)
-    conts = conts.reshape(conts.shape[0], -1)
+    is_max_cont,max_cont,bin_frame = get_line_contour(roi)
 
-    top_edge = conts[conts[:, 1] < 2]
-    # draw_points(roi,top_edge)
+    if is_max_cont:
+        max_cont = max_cont.reshape(max_cont.shape[0], -1)
 
-    bottom_edge=conts[conts[:, 1] > (BOX_HEIGHT-3)]
-    draw_points(roi,bottom_edge)
-   
+        top_edge = max_cont[max_cont[:, 1] < 2]
+        # draw_points(roi,top_edge)
+        
+        
+
+        bottom_edge=max_cont[max_cont[:, 1] > (BOX_HEIGHT-3)]
+        draw_points(roi,bottom_edge)
+    
+
+        left_edge= max_cont[max_cont[:, 0] < 2]
+        # draw_points(roi,left_edge)
+        
+        right_edge=max_cont[max_cont[:, 0] > (BOX_WIDTH-3)]
+        # draw_points(roi,right_edge)
 
     left_edge= conts[conts[:, 0] < 2]
     # draw_points(roi,left_edge)
@@ -134,7 +145,7 @@ def process_roi(roi: np.ndarray):
         # TODO : Handle end of miss the line with checking otsu thresold
         return -1,bin_frame,None
 
-    return bin_frame,0
+    return 0,bin_frame,0
 
 def pid(error: int) -> None:
     global prev_error
@@ -146,6 +157,8 @@ def pid(error: int) -> None:
 
     left_motor_velo = AVG_SPEED + correction
     right_motor_velo = AVG_SPEED - correction
+
+    # print("L:",left_motor_velo,"\t, R:",right_motor_velo)
 
     motor_driver.forward(left_motor_speed=left_motor_velo, right_motor_speed=right_motor_velo)
 
