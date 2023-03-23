@@ -133,13 +133,15 @@ def process_roi(roi: np.ndarray):
             error=top_edge_mid_point[0]-BOX_HALF_WIDTH
             norm_error=error/BOX_HALF_WIDTH            
             # cv2.circle(roi,top_edge_mid_point,1,(0,255,255),1)
-            return JUNCTN_NONE,bin_frame,norm_error    
+            return JUNCTN_NONE,bin_frame,norm_error 
+        else:
+        # TODO : Handle end of miss the line with checking otsu thresold
+            return -1,bin_frame,None   
 
     else:
         # TODO : Handle end of miss the line with checking otsu thresold
         return -1,bin_frame,None
 
-    return 0,bin_frame,0
 
 def pid(error: int) -> None:
     global prev_error
