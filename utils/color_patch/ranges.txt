@@ -1,0 +1,8 @@
+red   hue 0,10 160,179
+green hue 45,80
+blue  hue 96,131
+
+
+
+remove white sat 97,255
+remove black val 28,255
