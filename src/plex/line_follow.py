@@ -12,19 +12,14 @@ BOX = (camera.WIDTH//2, camera.HEIGHT//3, 4*camera.WIDTH//5, 8) # (x,y,w,h)
 BOX_X,BOX_Y,BOX_WIDTH,BOX_HEIGHT=BOX
 BOX_HALF_WIDTH=BOX_WIDTH//2
 BOX_HALF_HEIGHT=BOX_HEIGHT//2
+LEFT_POINT = BOX_WIDTH//5
+RIGHT_POINT = 4*BOX_WIDTH//5
 
-COLOR_PATCH_THRES=255*BOX_WIDTH*BOX_HEIGHT//2
-
-JUNCTN_NONE=0
-JUNCTN_L_LEFT=1
-JUNCTN_L_RIGHT=2
-
-JUNCTN_T_NORM=3
-JUNCTN_T_LEFT=4
-JUNCTN_T_RIGHT=5
-
-JUNCTN_CROSS=6
-JUNCTN_END=7
+LINE_EXIST = 0
+JUNCTN_L_LEFT = 1
+JUNCTN_L_RIGHT = 2
+JUNCTN_T = 3
+LINE_END = 4
 
 AVG_SPEED = 30
 KP = 60
@@ -40,7 +35,7 @@ def init(cam_node: Camera) -> None:
 
 def get_bin_frame(frame: np.ndarray) -> np.ndarray:
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret, bin_frame = cv2.threshold(gray_frame, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret, bin_frame = cv2.threshold(gray_frame, 100, 255, cv2.THRESH_BINARY)
 
     # morphology
     bin_frame = cv2.morphologyEx(bin_frame, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(3,3)))
@@ -57,10 +52,11 @@ def get_line_contour(frame: np.ndarray) -> np.ndarray:
 
 # def get_intersection(frame: )
 
-
-
-def get_point(conts: np.ndarray, _axis: int):    
-    return (np.amin(conts,axis=_axis)+np.amax(conts,axis=_axis))//2
+def get_point(conts: np.ndarray, _axis: int):
+    left_point = np.amin(conts,axis=_axis)[0]
+    right_point = np.amax(conts,axis=_axis)[0]
+    mid_point = (left_point + right_point)//2
+    return left_point, mid_point, right_point
 
 def get_roi():
     img = cam.get_frame()
@@ -76,74 +72,49 @@ def draw_points(img,points):
         cv2.circle(img,point,1,(0,255,0),1)
 
 def process_roi(roi: np.ndarray):    
-    
     is_cont,max_cont,bin_frame = get_line_contour(roi)
 
     if is_cont:
         max_cont = max_cont.reshape(max_cont.shape[0], -1)
 
-        top_edge = max_cont[max_cont[:, 1] < 2]
-        draw_points(roi,top_edge)
+        # top_edge = max_cont[max_cont[:, 1] < 2]
+        # draw_points(roi,top_edge)
 
         bottom_edge=max_cont[max_cont[:, 1] > (BOX_HEIGHT-3)]
         # draw_points(roi,bottom_edge)
 
-        left_edge= max_cont[max_cont[:, 0] < 2]
+        # left_edge= max_cont[max_cont[:, 0] < 2]
         # draw_points(roi,left_edge)
         
-        right_edge=max_cont[max_cont[:, 0] > (BOX_WIDTH-3)]
+        # right_edge=max_cont[max_cont[:, 0] > (BOX_WIDTH-3)]
         # draw_points(roi,right_edge)
    
-        if top_edge.size:        
+        if bottom_edge.size:
+            left_point = np.amin(bottom_edge,axis=0)[0]
+            right_point = np.amax(bottom_edge,axis=0)[0]
+            mid_point = (left_point + right_point)//2 
+            left_point_exist = left_point < LEFT_POINT
+            right_point_exist = right_point > RIGHT_POINT
+            # draw_points(roi, [left_point, right_point, mid_point])   
         
-            # if top_edge.size and left_edge.size and right_edge.size:
-            #     # print("+")
-            #     return JUNCTN_CROSS,bin_frame,None
-            #     pass
-            # elif top_edge.size and left_edge.size:
-            #     # print("TL")
-            #     return JUNCTN_T_LEFT,bin_frame,None
-            #     pass
-            # elif top_edge.size and right_edge.size:
-            #     # print("TR")
-            #     return JUNCTN_T_RIGHT,bin_frame,None
-            #     pass
-            # elif left_edge.size and right_edge.size:
-            #     # print("TN")
-            #     return JUNCTN_T_NORM,bin_frame,None
-            #     pass
-            # elif left_edge.size:
-            #     # print("L")
-            #     return JUNCTN_L_LEFT,bin_frame,None
-            #     pass
-            # elif right_edge.size:
-            #     # print("R")
-            #     return JUNCTN_L_RIGHT,bin_frame,None
-            #     pass
-            # elif top_edge.size:            
-            #     bottom_edge_mid_point=get_point(bottom_edge,0)
-            #     error=bottom_edge_mid_point[0]-BOX_HALF_WIDTH
-            #     norm_error=error/BOX_HALF_WIDTH
-            #     # print(norm_error)
-            #     cv2.circle(roi,bottom_edge_mid_point,3,(0,255,255),3)
-            #     return JUNCTN_NONE,bin_frame,norm_error
-            # else:
-            #     return JUNCTN_END,bin_frame,None
-
-            # only for pid tune
-            top_edge_mid_point=get_point(top_edge,0)
-            error=top_edge_mid_point[0]-BOX_HALF_WIDTH
-            norm_error=error/BOX_HALF_WIDTH            
+            if (not left_point_exist) and (not right_point_exist):
+                error = mid_point - BOX_HALF_WIDTH
+                norm_error = error/BOX_HALF_WIDTH 
+                return LINE_EXIST, bin_frame, norm_error 
+            elif (left_point_exist) and (right_point_exist):
+                return JUNCTN_T, bin_frame, None
+            elif (left_point_exist) and (not right_point_exist):
+                return JUNCTN_L_LEFT, bin_frame, None
+            else:
+                return JUNCTN_L_RIGHT, bin_frame, None
             # cv2.circle(roi,top_edge_mid_point,1,(0,255,255),1)
-            return JUNCTN_NONE,bin_frame,norm_error 
+             
         else:
-        # TODO : Handle end of miss the line with checking otsu thresold
-            return -1,bin_frame,None   
-
+            # TODO : Handle end of miss the line with checking otsu thresold
+            return LINE_END, bin_frame, None
     else:
         # TODO : Handle end of miss the line with checking otsu thresold
-        return -1,bin_frame,None
-
+        return LINE_END, bin_frame, None
 
 def pid(error: int) -> None:
     global prev_error
@@ -164,13 +135,14 @@ def pid(error: int) -> None:
 def test():
     roi,img=get_roi()
     junctn,bin_frame,norm_error=process_roi(roi)
-    if junctn>=0:
-        pid(norm_error)
-    else:
-        print("line miss")
-    # cv2.imshow('img',img)
-    # cv2.imshow('roi',roi)
-    # cv2.imshow('frame',bin_frame)
+    print(junctn, norm_error)
+    # if junctn>=0:
+    #     pid(norm_error)
+    # else:
+    #     print("line miss")
+    cv2.imshow('img',img)
+    cv2.imshow('roi',roi)
+    cv2.imshow('frame',bin_frame)
 
 def follow():
     roi,img=get_roi()
