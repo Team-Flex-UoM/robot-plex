@@ -8,7 +8,7 @@ RIGHT = 2
 BACK=3
 
 TURN_SPEED = 30
-TURN_ENC_COUNT = 50
+TURN_ENC_COUNT = 60
 
 is_running = False
 
