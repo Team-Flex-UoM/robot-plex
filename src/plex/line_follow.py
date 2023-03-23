@@ -4,7 +4,7 @@ import numpy as np
 import plex.camera as camera
 from plex.camera import Camera
 import plex.motor_driver as motor_driver
-
+import plex.color_detect as color_detect
 
 
 BOX = (camera.WIDTH//2, camera.HEIGHT//3, 4*camera.WIDTH//5, 8) # (x,y,w,h)
@@ -102,19 +102,19 @@ def process_roi(roi: np.ndarray):
                 norm_error = error/BOX_HALF_WIDTH 
                 return LINE_EXIST, bin_frame, norm_error 
             elif (left_point_exist) and (right_point_exist):
-                return JUNCTN_T, bin_frame, None
+                return JUNCTN_T, bin_frame, 0
             elif (left_point_exist) and (not right_point_exist):
-                return JUNCTN_L_LEFT, bin_frame, None
+                return JUNCTN_L_LEFT, bin_frame, 0
             else:
-                return JUNCTN_L_RIGHT, bin_frame, None
+                return JUNCTN_L_RIGHT, bin_frame, 0
             # cv2.circle(roi,top_edge_mid_point,1,(0,255,255),1)
              
         else:
             # TODO : Handle end of miss the line with checking otsu thresold
-            return LINE_END, bin_frame, None
+            return LINE_END, bin_frame, 0
     else:
         # TODO : Handle end of miss the line with checking otsu thresold
-        return LINE_END, bin_frame, None
+        return LINE_END, bin_frame, 0
 
 def pid(error: int) -> None:
     global prev_error
@@ -156,5 +156,13 @@ def follow():
         # cv2.imshow('frame',bin_frame)
 
     return junctn
+
+def initial_line_follow():
+    while True:
+        roi,img=get_roi()
+        if color_detect.on_green_patch(roi): break
+        junctn,bin_frame,norm_error=process_roi(roi)
+        pid(norm_error)
+
 
     
